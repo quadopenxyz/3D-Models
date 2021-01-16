@@ -42,7 +42,7 @@ pin_hole_z = 3300;
 dimple_d = pin_hole_d;
 dimple_depth = dimple_d/2;
 dimple_y = pin_hole_y;
-dimple_z = 135;//125;
+dimple_z = 140;//150;//135;//125;
 
 join_stud_d = 125 * 1.25;
 join_stud_h = bay_thick + bay_pcb_setback/2;//join_stud_d;
@@ -95,39 +95,9 @@ num4_hole = [115, 140, 225, 90]; // [Thread diameter, Thread clearance diameter,
 num4_hole_depth = 390;
 num4_hole_offsets = [150, bay_w-150, bay_w/2 - num4_hole_middle_offset];
 
-module dovetail(w,h,z,rot)
-{
-	zdiv = h / 8;
-	translate([0, w+.0063, z/2])
-		rotate([90,rot,0])
-			linear_extrude(height = w+.0125)
-				polygon([
-					[0,0],
-					[0,-zdiv*3],
-					[.5,-zdiv*3],
-					[mils2mm(160),0],
-					[.5,zdiv*3],
-					[0,zdiv*3]
-					]);
-}
-
 module foot(x=10, y=10, h=10)
 {
 	cube([x, y, h]);
-
-/*
-	rotate([90,0,0])
-		#linear_extrude(height = y)
-			polygon([
-				[0,0]
-				, [x/2,0]
-				, [x/2,h/2]
-				, [x,h/2]
-				, [x,h]
-				, [0,h]
-				, [0,0]
-				]);
-	*/
 }
 
 module bottom()
@@ -205,7 +175,7 @@ module back()
 				// back metal
 				cube([mils2mm(thick_all), mils2mm(bay_w), mils2mm(bay_h)]);
 				
-				// dove tail
+				// foot
 				translate([mils2mm(thick_all), 0, mils2mm(slot_z)])
 					foot(mils2mm(bay_thick + slot_z), mils2mm(bay_w), mils2mm(bay_thick));
 			}
@@ -224,7 +194,7 @@ module back()
 					cube([mils2mm(bay_pcb_thick+10), mils2mm(bay_w)+1, mils2mm(bay_pcb_h)]);
 				
 				// pcb clamp / mount screw holes
-				for(z=[0, bay_pcb_h-250]) // backside clearance holes
+				for(z=[10, bay_pcb_h-250]) // backside clearance holes
 					for(y=[250, bay_w-250])
 						translate([-.0125, mils2mm(y), mils2mm(bay_thick + slot_z + feeder_connector_Z - 632_hole[0] + z)])
 							rotate([0, 90, 0])
