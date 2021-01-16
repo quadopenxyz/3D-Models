@@ -25,7 +25,7 @@ slot_pocket_rail_w = 200;
 
 bay_pcb_thick = 63;
 bay_pcb_h = 1500;
-bay_pcb_z = 272;//265;//250;
+bay_pcb_z = 278;//272;//265;//250;
 bay_pcb_setback = 150;
 
 feeder_connector_w = 310;
@@ -195,9 +195,10 @@ module back()
 					y = i*slot_interval + slot_ofs;
 					
 					// uper aligment pin pocket
-					translate([mils2mm(x -pin_hole_depth), mils2mm(y + slot_w), mils2mm(z + pin_hole_z)])
+					sdiff = 20;
+					translate([mils2mm(x -pin_hole_depth)-.5, mils2mm(y + slot_w), mils2mm(z + pin_hole_z-sdiff)])
 						rotate([0, 90, 0])
-							obroundHole(d1=mils2mm(pin_hole_h), d2=mils2mm(pin_hole_d), h=mils2mm(pin_hole_depth)+1);
+							obroundHole(d1=mils2mm(pin_hole_h-(sdiff*4)), d2=mils2mm(pin_hole_d), h=mils2mm(pin_hole_depth)+1);
 					
 					// lower alignment recess
 					translate([mils2mm(x-dimple_depth), mils2mm(y + slot_w), mils2mm(z + dimple_z)])
