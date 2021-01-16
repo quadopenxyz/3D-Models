@@ -5,6 +5,7 @@
 Render_Bottom = true;
 Render_Back = true;
 Render_Back_Horizontal = false;
+Render_Separate = true;
 
 /*[Dimensions]*/
 
@@ -94,6 +95,22 @@ num4_hole = [115, 140, 225, 90]; // [Thread diameter, Thread clearance diameter,
 num4_hole_depth = 390;
 num4_hole_offsets = [150, bay_w-150, bay_w/2 - num4_hole_middle_offset];
 
+module dovetail(w,h,z,rot)
+{
+	zdiv = h / 8;
+	translate([0, w+.0063, z/2])
+		rotate([90,rot,0])
+			linear_extrude(height = w+.0125)
+				polygon([
+					[0,0],
+					[0,-zdiv*3],
+					[.5,-zdiv*3],
+					[mils2mm(160),0],
+					[.5,zdiv*3],
+					[0,zdiv*3]
+					]);
+}
+
 module bottom()
 {
 	difference()
@@ -109,18 +126,21 @@ module bottom()
 		// cavities
 		union()
 		{
+			// dove tail
+			translate([2,0,0])
+				dovetail(mils2mm(bay_w), mils2mm(bay_thick + slot_z - 50), mils2mm(bay_thick + slot_z), 180);
 			// slots
 			for(y=[0:slots-1])
-				translate([0, mils2mm(y*slot_interval + slot_ofs + (slot_w/2)), mils2mm(bay_thick)])
-					cube([mils2mm(bay_depth - slot_pocket_w - slot_pocket_rail_w), mils2mm(slot_w), mils2mm(slot_z)]);
+				translate([-.1, mils2mm(y*slot_interval + slot_ofs + (slot_w/2)), mils2mm(bay_thick)])
+					cube([mils2mm(bay_depth - slot_pocket_w - slot_pocket_rail_w)+.2, mils2mm(slot_w), mils2mm(slot_z)+.1]);
 
 			// pocket cavity
-			translate([mils2mm(bay_depth - slot_pocket_w - slot_pocket_rail_w), 0, mils2mm(bay_thick)])
-				cube([mils2mm(slot_pocket_w), mils2mm(bay_w)+2, mils2mm(slot_z)]);
+			translate([mils2mm(bay_depth - slot_pocket_w - slot_pocket_rail_w), -.1, mils2mm(bay_thick)])
+				cube([mils2mm(slot_pocket_w), mils2mm(bay_w)+.2, mils2mm(slot_z)+.1]);
 			// latch cavity
-			translate([mils2mm(bay_depth - slot_pocket_rail_w), mils2mm(bay_w), mils2mm(bay_thick)])
+			translate([mils2mm(bay_depth - slot_pocket_rail_w)-.0125, mils2mm(bay_w)+.1, mils2mm(bay_thick)])
 				rotate([90,0,0])
-					linear_extrude(height =mils2mm(bay_w))
+					linear_extrude(height = mils2mm(bay_w)+.2)
 						polygon([[0,0],[mils2mm(80),0],[0,mils2mm(slot_z)]]);
 		
 			// screw holes
@@ -160,8 +180,23 @@ module back()
 		{
 			thick_pcb_setback = bay_pcb_setback + bay_pcb_thick;
 			thick_all = bay_thick + thick_pcb_setback;
-			// back metal
-			cube([mils2mm(thick_all), mils2mm(bay_w), mils2mm(bay_h)]);
+			
+			union()
+			{
+				// back metal
+				cube([mils2mm(thick_all), mils2mm(bay_w), mils2mm(bay_h)]);
+				
+				difference()
+				{
+					// dove tail
+					translate([mils2mm(thick_all)+2,0,0])
+						dovetail(mils2mm(bay_w), mils2mm(bay_thick + slot_z - 50), mils2mm(bay_thick + slot_z), 180);
+					// slots
+					for(y=[0:slots-1])
+						translate([-.1, mils2mm(y*slot_interval + slot_ofs + (slot_w/2)), mils2mm(bay_thick)])
+							cube([mils2mm(bay_depth - slot_pocket_w - slot_pocket_rail_w)+.2, mils2mm(slot_w), mils2mm(slot_z)+.1]);
+				}
+			}
 			
 			union()
 			{
@@ -184,9 +219,9 @@ module back()
 				// pcb clamp / mount screw holes
 				for(z=[0, bay_pcb_h-250]) // backside clearance holes
 					for(y=[250, bay_w-250])
-						translate([-.5, mils2mm(y), mils2mm(bay_thick + slot_z + feeder_connector_Z - 632_hole[0] + z)])
+						translate([-.0125, mils2mm(y), mils2mm(bay_thick + slot_z + feeder_connector_Z - 632_hole[0] + z)])
 							rotate([0, 90, 0])
-								cylinder(d=mils2mm(632_hole[0]), h=mils2mm(bay_thick)+1);
+								cylinder(d=mils2mm(632_hole[0]), h=mils2mm(bay_thick)+.025);
 
 				x = thick_all;
 				z = bay_thick + slot_z;
@@ -208,9 +243,9 @@ module back()
 
 				// screw holes
 				for(y=num4_hole_offsets)
-					translate([0, mils2mm(y), mils2mm(bay_thick + slot_z)/2])
+					translate([-.0125, mils2mm(y), mils2mm(bay_thick + slot_z)/2])
 						rotate([0, 90, 0])
-							screwHoleClearance(screw=num4_hole, h=thick_all);
+							screwHoleClearance(screw=num4_hole, h=thick_all+mm2mils(2.1));
 			}
 		}
 
@@ -231,9 +266,13 @@ module bay()
 		bottom();
 	if(Render_Back && Render_Back_Horizontal)
 		rotate([0,-90,0]) translate([mils2mm(bay_thick + slot_z - bay_pcb_thick), 0, 10]) back();
-	//translate([-mils2mm(bay_pcb_thick), 0, 0]) back();
 	if(Render_Back && !Render_Back_Horizontal)
-		translate([-20, 0, 0]) back();
+	{
+		if(Render_Separate)
+			translate([-20, 0, 0]) back();
+		else
+			translate([-mils2mm(bay_pcb_thick), 0, 0]) back();
+	}
 /*	
 	a = bay_thick + slot_z + bay_pcb_z;
 	b = bay_thick + slot_z;
