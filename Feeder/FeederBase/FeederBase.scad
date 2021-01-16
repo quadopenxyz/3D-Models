@@ -111,6 +111,25 @@ module dovetail(w,h,z,rot)
 					]);
 }
 
+module foot(x=10, y=10, h=10)
+{
+	cube([x, y, h]);
+
+/*
+	rotate([90,0,0])
+		#linear_extrude(height = y)
+			polygon([
+				[0,0]
+				, [x/2,0]
+				, [x/2,h/2]
+				, [x,h/2]
+				, [x,h]
+				, [0,h]
+				, [0,0]
+				]);
+	*/
+}
+
 module bottom()
 {
 	difference()
@@ -126,12 +145,12 @@ module bottom()
 		// cavities
 		union()
 		{
-			// dove tail
-			translate([2,0,0])
-				dovetail(mils2mm(bay_w), mils2mm(bay_thick + slot_z - 50), mils2mm(bay_thick + slot_z), 180);
+			translate([0, 0, mils2mm(slot_z)])
+				foot(mils2mm(bay_thick + slot_z), mils2mm(bay_w), mils2mm(bay_thick));
+
 			// slots
 			for(y=[0:slots-1])
-				translate([-.1, mils2mm(y*slot_interval + slot_ofs + (slot_w/2)), mils2mm(bay_thick)])
+				translate([mils2mm(bay_thick + slot_z)-.1, mils2mm(y*slot_interval + slot_ofs + (slot_w/2)), mils2mm(bay_thick)])
 					cube([mils2mm(bay_depth - slot_pocket_w - slot_pocket_rail_w)+.2, mils2mm(slot_w), mils2mm(slot_z)+.1]);
 
 			// pocket cavity
@@ -145,7 +164,7 @@ module bottom()
 		
 			// screw holes
 			for(y=num4_hole_offsets)
-				translate([0, mils2mm(y), mils2mm(bay_thick + slot_z)/2])
+				translate([0, mils2mm(y), (mils2mm(slot_z)/2)])
 					rotate([0, 90, 0])
 						cylinder(d=mils2mm(num4_hole[0]), h=mils2mm(num4_hole_depth));
 		}
@@ -186,16 +205,9 @@ module back()
 				// back metal
 				cube([mils2mm(thick_all), mils2mm(bay_w), mils2mm(bay_h)]);
 				
-				difference()
-				{
-					// dove tail
-					translate([mils2mm(thick_all)+2,0,0])
-						dovetail(mils2mm(bay_w), mils2mm(bay_thick + slot_z - 50), mils2mm(bay_thick + slot_z), 180);
-					// slots
-					for(y=[0:slots-1])
-						translate([-.1, mils2mm(y*slot_interval + slot_ofs + (slot_w/2)), mils2mm(bay_thick)])
-							cube([mils2mm(bay_depth - slot_pocket_w - slot_pocket_rail_w)+.2, mils2mm(slot_w), mils2mm(slot_z)+.1]);
-				}
+				// dove tail
+				translate([mils2mm(thick_all), 0, mils2mm(slot_z)])
+					foot(mils2mm(bay_thick + slot_z), mils2mm(bay_w), mils2mm(bay_thick));
 			}
 			
 			union()
@@ -205,17 +217,12 @@ module back()
 					xbox(x=mils2mm(thick_all), y=mils2mm(bay_w-500), z=mils2mm(1000*1.25));
 
 				// pcb pocket
-//				translate([mils2mm(bay_thick), 0, mils2mm(bay_thick + slot_z + bay_pcb_z)])
-//					%cube([mils2mm(thick_pcb_setback)+1, mils2mm(bay_w), mils2mm(bay_pcb_h)]);
 				translate([mils2mm(bay_thick+bay_pcb_thick), mils2mm(125), mils2mm(bay_thick + slot_z + bay_pcb_z)])
 					cube([5, mils2mm(bay_w-250), mils2mm(bay_pcb_h)]);
 				
 				translate([mils2mm(bay_thick), -.5, mils2mm(bay_thick + slot_z + bay_pcb_z)])
 					cube([mils2mm(bay_pcb_thick+10), mils2mm(bay_w)+1, mils2mm(bay_pcb_h)]);
 				
-				//translate([0, mils2mm(375), mils2mm(bay_pcb_h-650)])
-				//	xbox(x=mils2mm(bay_thick), y=mils2mm(bay_w-750), z=mils2mm(bay_pcb_h-500));
-
 				// pcb clamp / mount screw holes
 				for(z=[0, bay_pcb_h-250]) // backside clearance holes
 					for(y=[250, bay_w-250])
@@ -243,9 +250,9 @@ module back()
 
 				// screw holes
 				for(y=num4_hole_offsets)
-					translate([-.0125, mils2mm(y), mils2mm(bay_thick + slot_z)/2])
+					translate([-.0125, mils2mm(y), (mils2mm(slot_z)/2)])
 						rotate([0, 90, 0])
-							screwHoleClearance(screw=num4_hole, h=thick_all+mm2mils(2.1));
+							screwHoleClearance(screw=num4_hole, h=thick_all+bay_thick + slot_z+1);
 			}
 		}
 
