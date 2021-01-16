@@ -25,7 +25,7 @@ slot_pocket_rail_w = 200;
 
 bay_pcb_thick = 63;
 bay_pcb_h = 1500;
-bay_pcb_z = 265;
+bay_pcb_z = 272;//265;//250;
 bay_pcb_setback = 150;
 
 feeder_connector_w = 310;
@@ -132,13 +132,13 @@ module bottom()
 	}
 }
 
-module backUpperPocket(x, y, z)
+module xbox(x, y, z)
 {
 	t = mils2mm(125);
 	difference()
 	{
 		// the window
-		translate([0,0,0]) cube([x, y, z]);
+		translate([-.5,0,0]) cube([x+1, y, z]);
 		
 		// the cross hair
 		llur = [ [0,0], [t/2,0], [z,y-t/2], [z,y], [z-t/2,y], [0,t/2], [0,0] ]; // lower left to upper right
@@ -165,20 +165,28 @@ module back()
 			
 			union()
 			{
-				///*
 				// upper pocket
 				translate([0, mils2mm(250), mils2mm(bay_thick + slot_z + 1850)])
-					backUpperPocket(x=mils2mm(thick_all), y=mils2mm(bay_w-500), z=mils2mm(1000*1.25));
-				//*/
+					xbox(x=mils2mm(thick_all), y=mils2mm(bay_w-500), z=mils2mm(1000*1.25));
+
 				// pcb pocket
+//				translate([mils2mm(bay_thick), 0, mils2mm(bay_thick + slot_z + bay_pcb_z)])
+//					%cube([mils2mm(thick_pcb_setback)+1, mils2mm(bay_w), mils2mm(bay_pcb_h)]);
+				translate([mils2mm(bay_thick+bay_pcb_thick), mils2mm(125), mils2mm(bay_thick + slot_z + bay_pcb_z)])
+					cube([5, mils2mm(bay_w-250), mils2mm(bay_pcb_h)]);
+				
 				translate([mils2mm(bay_thick), -.5, mils2mm(bay_thick + slot_z + bay_pcb_z)])
-					cube([mils2mm(thick_pcb_setback), mils2mm(bay_w)+1, mils2mm(bay_pcb_h)]);
+					cube([mils2mm(bay_pcb_thick+10), mils2mm(bay_w)+1, mils2mm(bay_pcb_h)]);
+				
+				//translate([0, mils2mm(375), mils2mm(bay_pcb_h-650)])
+				//	xbox(x=mils2mm(bay_thick), y=mils2mm(bay_w-750), z=mils2mm(bay_pcb_h-500));
+
 				// pcb clamp / mount screw holes
 				for(z=[0, bay_pcb_h-250]) // backside clearance holes
 					for(y=[250, bay_w-250])
-						translate([0, mils2mm(y), mils2mm(bay_thick + slot_z + feeder_connector_Z - 632_hole[0] + z)])
+						translate([-.5, mils2mm(y), mils2mm(bay_thick + slot_z + feeder_connector_Z - 632_hole[0] + z)])
 							rotate([0, 90, 0])
-								cylinder(d=mils2mm(632_hole[0]), h=mils2mm(bay_thick));
+								cylinder(d=mils2mm(632_hole[0]), h=mils2mm(bay_thick)+1);
 
 				x = thick_all;
 				z = bay_thick + slot_z;
@@ -189,12 +197,12 @@ module back()
 					// uper aligment pin pocket
 					translate([mils2mm(x -pin_hole_depth), mils2mm(y + slot_w), mils2mm(z + pin_hole_z)])
 						rotate([0, 90, 0])
-							obroundHole(d1=mils2mm(pin_hole_h), d2=mils2mm(pin_hole_d), h=mils2mm(pin_hole_depth));
+							obroundHole(d1=mils2mm(pin_hole_h), d2=mils2mm(pin_hole_d), h=mils2mm(pin_hole_depth)+1);
 					
 					// lower alignment recess
 					translate([mils2mm(x-dimple_depth), mils2mm(y + slot_w), mils2mm(z + dimple_z)])
 						rotate([0,90,0])
-							cylinder(d=mils2mm(dimple_d), h=mils2mm(dimple_depth));//sphere(mils2mm(dimple_d/2));
+							cylinder(d=mils2mm(dimple_d), h=mils2mm(dimple_depth) + 1);//sphere(mils2mm(dimple_d/2));
 				}
 
 				// screw holes
