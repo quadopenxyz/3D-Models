@@ -1,0 +1,39 @@
+{
+    "parameterSets": {
+        "20 Step": {
+            "$fn": "200",
+            "Render_Shaft": "true",
+            "Render_Shaft_Extrude": "true",
+            "Render_Slit_Square": "false",
+            "Render_Slits": "true",
+            "encoderID": "9.5",
+            "encoderOD": "15",
+            "encoderSlitCount": "20",
+            "shaftBevel": "0.3",
+            "shaftDiameter": "2",
+            "shaftHeight": "27",
+            "shaftOD": "4.75",
+            "wheelDiameter": "17",
+            "wheelGrooveDepth": "0",
+            "wheelHeigh": "1.3"
+        },
+        "10 Step": {
+            "$fn": "200",
+            "Render_Shaft": "true",
+            "Render_Shaft_Extrude": "true",
+            "Render_Slit_Square": "false",
+            "Render_Slits": "true",
+            "encoderID": "9.5",
+            "encoderOD": "17",
+            "encoderSlitCount": "10",
+            "shaftBevel": "0.3",
+            "shaftDiameter": "2",
+            "shaftHeight": "27",
+            "shaftOD": "4.75",
+            "wheelDiameter": "17",
+            "wheelGrooveDepth": "0",
+            "wheelHeigh": "1.3"
+        }
+    },
+    "fileFormatVersion": "1"
+}
