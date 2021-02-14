@@ -1,102 +1,109 @@
+// This is a tweaked mashup of;
 // https://www.thingiverse.com/thing:156076/files
+// https://www.thingiverse.com/thing:31363/files
 
 /*[Parts to Render]*/
 Render_Slits = true;
 Render_Shaft = true;
 Render_Shaft_Extrude = true;
 Render_WormGear = true;
+Render_D_Key = true;
+Render_FDM_Support = false;
 
-Worm_Pitch = 1.66;//1.75;//2;//1.5;
-Worm_Diameter = 9.6;
-Worm_Height = 14;
+/*[Worm Params]*/
+Worm_Pitch = 1.66;//[0:0.1:10]
+Worm_Diameter = 9.6;//[0:0.1:20]
+Worm_Height = 14;//[0:0.1:20]
 Worm_Step = 10;
-Worm_Offset = 1;
+Worm_Elevation = 3;//[0:0.1:10]
 
-shaftDiameter = 2.1;//2.3188; //2.4188;//2.4125;//2.425; // shaft ID
-shaftOD = 4.75;
-wheelDiameter = 17;
+/*[Shaft Params]*/
+Shaft_ID = 2.1;//[0:0.01:10]
+Shaft_OD = 4.75;//[0:0.01:10]
+Shaft_Height = 25;//[0:0.1:30]
+Shaft_Bevel = 0.3;//[0:0.1:5]
 
-shaftHeight = 25;
-shaftBevel = 0.3;
+/*[Wheel Params]*/
+Wheel_Diameter = 17;//[0:0.1:25]
+Wheel_Height = 1.3;//[0:0.1:5]
 
-wheelHeigh = 1.3;
-wheelGrooveDepth = 0.0;
-
-encoderOD = 17;
-encoderID = 9.5;
-
-encoderSlitCount = 20;
-encoderSlitType = 0;//[0:Rectangle, 1:Wedge, 2:Tilted Rectangle, 3:Tilted Wedge, 4:Rounded]
+Encoder_OD = 15;//[0:0.1:30]
+Encoder_ID = 9.5;//[0:0.1:30]
+Encoder_Slit_Count = 20;//[0:1:40]
+Encoder_Slit_Type = 4;//[0:Rectangle, 1:Wedge, 2:Tilted Rectangle, 3:Tilted Wedge, 4:Rounded]
 
 /*[Hidden]*/
 $fn=200;
 
-encoderSlitWidth = (360/encoderSlitCount) / encoderOD;//2.35;
+shaft_Radius = (Shaft_OD - Shaft_ID)/2;
+shaft_ID_Radius = Shaft_ID/2;
 
-shaftMargin = (shaftOD - shaftDiameter)/2; // shaft radius
-encoderInnerRadius = encoderID/2;
-encoderOuterRadius = encoderOD/2;
-shaftR = shaftDiameter/2;
-wheelR = wheelDiameter/2;
+wheel_Radius = Wheel_Diameter/2;
+Wheel_Groove_Depth = 0.0;
 
+encoderSlitWidth = (360/Encoder_Slit_Count) / Encoder_OD;
+encoderInnerRadius = Encoder_ID/2;
+encoderOuterRadius = Encoder_OD/2;
 encoderSlitLength = encoderOuterRadius-encoderInnerRadius;
 
-pollyPoints = [
-	[shaftR+shaftBevel,0],
-	[wheelR,0],
-	[wheelR-wheelGrooveDepth,wheelHeigh/2],
-	[wheelR,wheelHeigh],
-	[shaftR+shaftMargin,wheelHeigh],
-	[shaftR+shaftMargin,shaftHeight],
-	[shaftR+shaftBevel,shaftHeight],
-	[shaftR,shaftHeight-shaftBevel],
-	[shaftR,shaftBevel],
-	];
-
+// https://www.thingiverse.com/thing:156076/files / Neal Horman / Steve Clynes
 module DrawSlit()
 {
-  if (encoderSlitType == 0)
+  if (Encoder_Slit_Type == 0) // rectangle
   {
-    cube(size = [encoderSlitWidth, encoderSlitLength, wheelHeigh+.1], center = true);
+    cube(size = [encoderSlitWidth, encoderSlitLength, Wheel_Height+.1], center = true);
   }
-  else if (encoderSlitType == 1)
+  else if (Encoder_Slit_Type == 1) // wedge
   {
     translate([0, -encoderSlitLength / 2, 0 ])
 		hull()
 		{
-			cube([encoderSlitWidth * .7, 0.01, wheelHeigh+.1], center = true);
+			cube([encoderSlitWidth * .7, 0.01, Wheel_Height+.1], center = true);
 			translate([0, encoderSlitLength, 0])
-				cube([encoderSlitWidth * 1.3, 0.01, wheelHeigh+.1], center = true);
+				cube([encoderSlitWidth * 1.3, 0.01, Wheel_Height+.1], center = true);
 		}
   }
-  else if (encoderSlitType == 2)
+  else if (Encoder_Slit_Type == 2) // tilted rectangle
   {
     rotate(-15, [0, 0, 1])
       translate([0, 0.2, 0])
-        cube(size = [encoderSlitWidth, encoderSlitLength * 1.2, wheelHeigh+.1], center = true);
+        cube(size = [encoderSlitWidth, encoderSlitLength * 1.2, Wheel_Height+.1], center = true);
   }
-  else if (encoderSlitType == 3)
+  else if (Encoder_Slit_Type == 3) // tilted wedge
   {
     rotate(-15, [0, 0, 1])
 		translate([0, (-encoderSlitLength / 2) - 0.2, 0 ])
 			hull()
 			{
-				cube([encoderSlitWidth * .7, 0.01, wheelHeigh+.1], center = true);
+				cube([encoderSlitWidth * .7, 0.01, Wheel_Height+.1], center = true);
 				translate([0, encoderSlitLength * 1.3, 0])
-					cube([encoderSlitWidth * 1.3, 0.01, wheelHeigh+.1], center = true);
+					cube([encoderSlitWidth * 1.3, 0.01, Wheel_Height+.1], center = true);
 			}
   }
-  else if (encoderSlitType == 4)
+  else if (Encoder_Slit_Type == 4) // rounded
   {
-    translate([0,wheelHeigh/4,0]) rotate([0,0,90]) hull()
+    translate([0,Wheel_Height/4,0]) rotate([0,0,90]) hull()
     {
       translate([encoderSlitLength/3.141,0,0])
-        cylinder(d=encoderSlitWidth, h=wheelHeigh+.1, center = true);
+        cylinder(d=encoderSlitWidth, h=Wheel_Height+.1, center = true);
       translate([-encoderSlitLength/3.141,0,0])
-        cylinder(d=encoderSlitWidth, h=wheelHeigh+.1, center = true);
+        cylinder(d=encoderSlitWidth, h=Wheel_Height+.1, center = true);
     }
   }
 }
+
+// https://www.thingiverse.com/thing:156076/files
+pollyPoints = [
+	[shaft_ID_Radius+Shaft_Bevel,0],
+	[wheel_Radius,0],
+	[wheel_Radius-Wheel_Groove_Depth,Wheel_Height/2],
+	[wheel_Radius,Wheel_Height],
+	[shaft_ID_Radius+shaft_Radius,Wheel_Height],
+	[shaft_ID_Radius+shaft_Radius,Shaft_Height],
+	[shaft_ID_Radius+Shaft_Bevel,Shaft_Height],
+	[shaft_ID_Radius,Shaft_Height-Shaft_Bevel],
+	[shaft_ID_Radius,Shaft_Bevel],
+	];
 
 module wheel()
 {
@@ -105,47 +112,28 @@ module wheel()
 		if(Render_Shaft)
 		{
 			if(Render_Shaft_Extrude)
-			rotate_extrude($fn=200)
-				polygon(points=pollyPoints);
+				rotate_extrude($fn=200)
+					polygon(points=pollyPoints);
 			else 
 				polygon(points=pollyPoints);
 		}
 
 		if(Render_Slits && ( Render_Shaft_Extrude || !Render_Shaft))
 		{
-			union()
-			{
-				for(i=[0:encoderSlitCount-1])
-				{
-					rotate(a = [0,0,(360/encoderSlitCount)*i])
-					{
-						translate(v=[0, encoderInnerRadius+(encoderSlitLength/2), -.05])
-						{
-							translate ([0, 0, (wheelHeigh/2)+.05]) 
-								DrawSlit();
-						}
-					}
-				}
-			}
+			for(i=[0:Encoder_Slit_Count-1])
+				rotate(a = [0,0,(360/Encoder_Slit_Count)*i])
+					translate(v=[0, encoderInnerRadius+(encoderSlitLength/2), -.05])
+						translate ([0, 0, (Wheel_Height/2)+.05]) 
+							DrawSlit();
 		}
 	}
 }
 
 
 // https://www.thingiverse.com/thing:31363/files
-
 // Metric Screw Thread Library
 // by Maximilian Karl <karlma@in.tum.de> (2012)
-// 
-//
 // only use module thread(P,D,h,step)
-// with the parameters:
-// P    - screw thread pitch
-// D    - screw thread major diameter
-// h    - screw thread height
-// step - step size in degree
-// 
-
 module screwthread_triangle(P)
 {
 	difference()
@@ -173,11 +161,15 @@ module screwthread_onerotation(P,D_maj,step)
 				translate([D_maj/2,0,(i+j)/360*P])
 					screwthread_triangle(P);
 
+	threadDepthRadius = D_min/2;//(D_min/2)-.2
 	translate([0,0,P/2])
-		//cylinder(r=D_min/2,h=2*P,$fn=360/step,center=true);
-		cylinder(r=D_min/2,h=2*P,center=true);
+		cylinder(r=threadDepthRadius,h=2*P,center=true);
 }
 
+// P    - screw thread pitch
+// D    - screw thread major diameter
+// h    - screw thread height
+// step - step size in degree
 module thread(P,D,h,step)
 {
 	for(i=[0:h/P])
@@ -185,22 +177,28 @@ module thread(P,D,h,step)
 			screwthread_onerotation(P,D,step);
 }
 
+// render the assembly
 {
 	if(Render_WormGear)
 		difference()
 		{
+			// Join the encoder wheel and shaft with the worm gear "screw thread"
 			union()
 			{
-				translate([0, 0, wheelHeigh + Worm_Offset + 2])
+				translate([0, 0, Wheel_Height + Worm_Elevation])
 					thread(Worm_Pitch, Worm_Diameter, Worm_Height, Worm_Step);
-				translate([0,0,wheelHeigh + Worm_Offset])
-					cylinder(d1=shaftOD, d2=screwDiamMin(Worm_Pitch, Worm_Diameter), h=1.25);
+				if(Render_FDM_Support)
+					translate([0,0,Wheel_Height + Worm_Elevation - 2])
+						cylinder(d1=Shaft_OD, d2=screwDiamMin(Worm_Pitch, Worm_Diameter), h=1.25);
 			}
-			cylinder(r=shaftDiameter/2, h=shaftHeight);
+			// hollow out the shaft
+			cylinder(r=Shaft_ID/2, h=Shaft_Height);
 		}
-	// D key
-	translate([-shaftDiameter/2,shaftDiameter/3,0])
-		cube([shaftDiameter,shaftDiameter/2, shaftHeight/2.5-.25]);
+
+	// and add a "key way" to the shaft
+	if(Render_D_Key)
+		translate([-Shaft_ID/2,Shaft_ID/3,0])
+			cube([Shaft_ID,Shaft_ID/2, Shaft_Height/2.5-.25]);
 	wheel();
 }
 
