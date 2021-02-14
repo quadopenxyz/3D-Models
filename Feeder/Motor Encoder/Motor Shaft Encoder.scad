@@ -4,19 +4,19 @@
 Render_Slits = true;
 Render_Shaft = true;
 Render_Shaft_Extrude = true;
-Render_Slit_Square = true;
 Render_WormGear = true;
 
-Worm_Pitch = 1.75;//2;//1.5;
+Worm_Pitch = 1.66;//1.75;//2;//1.5;
 Worm_Diameter = 9.6;
 Worm_Height = 14;
 Worm_Step = 10;
+Worm_Offset = 1;
 
-shaftDiameter = 2.4188;//2.4125;//2.425; // shaft ID
+shaftDiameter = 2.1;//2.3188; //2.4188;//2.4125;//2.425; // shaft ID
 shaftOD = 4.75;
 wheelDiameter = 17;
 
-shaftHeight = 27;
+shaftHeight = 25;
 shaftBevel = 0.3;
 
 wheelHeigh = 1.3;
@@ -25,7 +25,8 @@ wheelGrooveDepth = 0.0;
 encoderOD = 17;
 encoderID = 9.5;
 
-encoderSlitCount = 10;
+encoderSlitCount = 20;
+encoderSlitType = 0;//[0:Rectangle, 1:Wedge, 2:Tilted Rectangle, 3:Tilted Wedge, 4:Rounded]
 
 /*[Hidden]*/
 $fn=200;
@@ -52,6 +53,51 @@ pollyPoints = [
 	[shaftR,shaftBevel],
 	];
 
+module DrawSlit()
+{
+  if (encoderSlitType == 0)
+  {
+    cube(size = [encoderSlitWidth, encoderSlitLength, wheelHeigh+.1], center = true);
+  }
+  else if (encoderSlitType == 1)
+  {
+    translate([0, -encoderSlitLength / 2, 0 ])
+		hull()
+		{
+			cube([encoderSlitWidth * .7, 0.01, wheelHeigh+.1], center = true);
+			translate([0, encoderSlitLength, 0])
+				cube([encoderSlitWidth * 1.3, 0.01, wheelHeigh+.1], center = true);
+		}
+  }
+  else if (encoderSlitType == 2)
+  {
+    rotate(-15, [0, 0, 1])
+      translate([0, 0.2, 0])
+        cube(size = [encoderSlitWidth, encoderSlitLength * 1.2, wheelHeigh+.1], center = true);
+  }
+  else if (encoderSlitType == 3)
+  {
+    rotate(-15, [0, 0, 1])
+		translate([0, (-encoderSlitLength / 2) - 0.2, 0 ])
+			hull()
+			{
+				cube([encoderSlitWidth * .7, 0.01, wheelHeigh+.1], center = true);
+				translate([0, encoderSlitLength * 1.3, 0])
+					cube([encoderSlitWidth * 1.3, 0.01, wheelHeigh+.1], center = true);
+			}
+  }
+  else if (encoderSlitType == 4)
+  {
+    translate([0,wheelHeigh/4,0]) rotate([0,0,90]) hull()
+    {
+      translate([encoderSlitLength/3.141,0,0])
+        cylinder(d=encoderSlitWidth, h=wheelHeigh+.1, center = true);
+      translate([-encoderSlitLength/3.141,0,0])
+        cylinder(d=encoderSlitWidth, h=wheelHeigh+.1, center = true);
+    }
+  }
+}
+
 module wheel()
 {
 	difference ()
@@ -75,16 +121,8 @@ module wheel()
 					{
 						translate(v=[0, encoderInnerRadius+(encoderSlitLength/2), -.05])
 						{
-							if(Render_Slit_Square)
-								translate ([0, 0, (wheelHeigh/2)+.05]) cube(size = [encoderSlitWidth, encoderSlitLength, wheelHeigh+.1], center = true);
-							else
-								translate([0,wheelHeigh/4,0]) rotate([0,0,90]) hull()
-								{
-									translate([encoderSlitLength/3.141,0,0])
-										cylinder(d=encoderSlitWidth, h=wheelHeigh+.1);
-									translate([-encoderSlitLength/3.141,0,0])
-										cylinder(d=encoderSlitWidth, h=wheelHeigh+.1);
-								}
+							translate ([0, 0, (wheelHeigh/2)+.05]) 
+								DrawSlit();
 						}
 					}
 				}
@@ -147,22 +185,22 @@ module thread(P,D,h,step)
 			screwthread_onerotation(P,D,step);
 }
 
-
 {
 	if(Render_WormGear)
-	difference()
-	{
-		union()
+		difference()
 		{
-			translate([0, 0, wheelHeigh + 4])
-				thread(Worm_Pitch, Worm_Diameter, Worm_Height, Worm_Step);
-			translate([0,0,wheelHeigh + 2])
-				cylinder(d1=shaftOD, d2=screwDiamMin(Worm_Pitch, Worm_Diameter), h=1.25);
+			union()
+			{
+				translate([0, 0, wheelHeigh + Worm_Offset + 2])
+					thread(Worm_Pitch, Worm_Diameter, Worm_Height, Worm_Step);
+				translate([0,0,wheelHeigh + Worm_Offset])
+					cylinder(d1=shaftOD, d2=screwDiamMin(Worm_Pitch, Worm_Diameter), h=1.25);
+			}
+			cylinder(r=shaftDiameter/2, h=shaftHeight);
 		}
-		cylinder(r=shaftDiameter/2, h=shaftHeight);
-	}
 	// D key
 	translate([-shaftDiameter/2,shaftDiameter/3,0])
 		cube([shaftDiameter,shaftDiameter/2, shaftHeight/2.5-.25]);
 	wheel();
 }
+
