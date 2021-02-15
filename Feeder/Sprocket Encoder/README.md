@@ -1,5 +1,5 @@
 # Sprocket Encoder
-Replicate the indexing gear incoder
+Replicate the indexing gear encoder
 
 This is inteded to be a 56 slot encoder replacement for indexing parts in 2mm vs. standard 4mm steps on older 8mm feeders.
 
