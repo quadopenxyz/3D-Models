@@ -3,6 +3,8 @@ Replicate the real-arm spindle
 
 This is intended to be a spindle replacement for any size reel.
 
+<img src="Media/Spindles2.jpg" alt="Model Image" style="border-width:0"/>
+
 # Copyright
 Copyright (c) Neal Horman, All rights reserved.
 
